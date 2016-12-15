@@ -12,12 +12,12 @@ export DO_TOR=0
 export IPV4_ADDR=$(drill myip.opendns.com @208.67.222.222 | grep -v \;\; | grep . | cut -f 5)
 
 export OPENVPN="/etc/openvpn"
-export ENV_CNF="$OPENVPN/env.sh"
+export ENV_CNF="${OPENVPN}/env.sh"
 
-export CLIENT_CNF="$OPENVPN/client.conf"
-export PKI_DIR="$OPENVPN/pki"
-export PKI_CNF="$PKI_DIR/pki.cnf"
-export VPN_CNF="$OPENVPN/openvpn.conf"
+export CLIENT_CNF="${OPENVPN}/client.conf"
+export PKI_DIR="${OPENVPN}/pki"
+export PKI_CNF="${PKI_DIR}/pki.cnf"
+export VPN_CNF="${OPENVPN}/openvpn.conf"
 export VPN_PID="/var/run/openvpn.pid"
 
 export PKI_DAYS=365
@@ -29,30 +29,32 @@ export PKI_CLIENT=client.${VPN_ID}.justhide.me
 export PKI_SERVER=vpn.${VPN_ID}.justhide.me
 export PKI_SIGNER=ca.${VPN_ID}.justhide.me
 export PKI_WEBSRV=web.${VPN_ID}.justhide.me
-
 export VPN_AUTH_ALGO="SHA256"
 export VPN_CIPHER="AES-128-CBC"
 export VPN_DNS=1
-#export VPN_DNS_SERVERS="8.8.8.8,8.8.4.4"
 export VPN_DNS_SERVERS="208.67.222.222,208.67.220.220"
-export VPN_SERVER="192.168.255.0/24"
-export VPN_TLS_AUTH="$PKI_DIR/key/tls-auth"
+export VPN_SUBNET="192.168.255.0/24"
+export VPN_TLS_AUTH="${PKI_DIR}/key/tls-auth"
 export VPN_TLS_CIPHER="TLS-DHE-RSA-WITH-AES-128-CBC-SHA256"
 
-export WEB_PEM="$PKI_DIR/$PKI_WEBSRV"
+export WEB_PEM="${PKI_DIR}/${PKI_WEBSRV}"
 
 ##############################
 # Create the environment file
 ##############################
-set -o posix ; set > $ENV_CNF
+set -o posix ; set > ${ENV_CNF}
 
 
 ############
 # Functions
 ############
 cidr2mask() {
-    eval $(ipcalc -m $1)
-    echo $NETMASK
+    eval $(ipcalc -m ${1})
+    echo ${NETMASK}
+}
+
+getnetdevice() {
+    echo "eth0"
 }
 
 getroute() {
@@ -64,14 +66,14 @@ getroute() {
 # Setup the PKI
 ################
 umask 0077
-mkdir -p -m 700 $PKI_DIR
-mkdir -m 700 $PKI_DIR/csr
-mkdir -m 700 $PKI_DIR/crt
-mkdir -m 700 $PKI_DIR/key
-touch $PKI_DIR/db
-echo 01 > $PKI_DIR/serial
+mkdir -p -m 700 ${PKI_DIR}
+mkdir -m 700 ${PKI_DIR}/csr
+mkdir -m 700 ${PKI_DIR}/crt
+mkdir -m 700 ${PKI_DIR}/key
+touch ${PKI_DIR}/db
+echo 01 > ${PKI_DIR}/serial
 
-cat > "$PKI_CNF" <<EOF
+cat > "${PKI_CNF}" <<EOF
 RANDFILE		= \$ENV::PKI_DIR/.rnd
 
 [ ca ]
@@ -138,54 +140,54 @@ subjectKeyIdentifier    = hash
 EOF
 
 # The server certs need a SAN
-export SAN="IP:$IPV4_ADDR"
+export SAN="IP:${IPV4_ADDR}"
 
 # Create the signing certificate
-export REQ_CN=$PKI_SIGNER
-openssl req -new -config $PKI_CNF -out $PKI_DIR/crt/$REQ_CN -keyout $PKI_DIR/key/$REQ_CN -x509
+export REQ_CN=${PKI_SIGNER}
+openssl req -new -config ${PKI_CNF} -out ${PKI_DIR}/crt/${REQ_CN} -keyout ${PKI_DIR}/key/${REQ_CN} -x509
 
 # Create the client certificate
-export REQ_CN=$PKI_CLIENT
-openssl req -new -config $PKI_CNF -out $PKI_DIR/csr/$REQ_CN -keyout $PKI_DIR/key/$REQ_CN
-openssl ca -config $PKI_CNF -in $PKI_DIR/csr/$REQ_CN -out $PKI_DIR/crt/$REQ_CN -extensions ephemeral_client -batch
+export REQ_CN=${PKI_CLIENT}
+openssl req -new -config ${PKI_CNF} -out ${PKI_DIR}/csr/${REQ_CN} -keyout ${PKI_DIR}/key/${REQ_CN}
+openssl ca -config ${PKI_CNF} -in ${PKI_DIR}/csr/${REQ_CN} -out ${PKI_DIR}/crt/${REQ_CN} -extensions ephemeral_client -batch
 
 # Create the vpn server certificate
-export REQ_CN=$PKI_SERVER
-openssl req -new -config $PKI_CNF -out $PKI_DIR/csr/$REQ_CN -keyout $PKI_DIR/key/$REQ_CN
-openssl ca -config $PKI_CNF -in $PKI_DIR/csr/$REQ_CN -out $PKI_DIR/crt/$REQ_CN -extensions ephemeral_server -batch
+export REQ_CN=${PKI_SERVER}
+openssl req -new -config ${PKI_CNF} -out ${PKI_DIR}/csr/${REQ_CN} -keyout ${PKI_DIR}/key/${REQ_CN}
+openssl ca -config ${PKI_CNF} -in ${PKI_DIR}/csr/${REQ_CN} -out ${PKI_DIR}/crt/${REQ_CN} -extensions ephemeral_server -batch
 
 # Create the web server certificate
-export REQ_CN=$PKI_WEBSRV
-openssl req -new -config $PKI_CNF -out $PKI_DIR/csr/$REQ_CN -keyout $PKI_DIR/key/$REQ_CN
-openssl ca -config $PKI_CNF -in $PKI_DIR/csr/$REQ_CN -out $PKI_DIR/crt/$REQ_CN -extensions ephemeral_server -batch
+export REQ_CN=${PKI_WEBSRV}
+openssl req -new -config ${PKI_CNF} -out ${PKI_DIR}/csr/${REQ_CN} -keyout ${PKI_DIR}/key/${REQ_CN}
+openssl ca -config ${PKI_CNF} -in ${PKI_DIR}/csr/${REQ_CN} -out ${PKI_DIR}/crt/${REQ_CN} -extensions ephemeral_server -batch
 
 
 ############################################
 # Build a certkey bundle for the web server
 ############################################
-openssl pkey -in $PKI_DIR/key/$PKI_WEBSRV -outform pem  > $WEB_PEM
-openssl x509 -in $PKI_DIR/crt/$PKI_WEBSRV -outform pem >> $WEB_PEM
-openssl x509 -in $PKI_DIR/crt/$PKI_SIGNER -outform pem >> $WEB_PEM
+openssl pkey -in ${PKI_DIR}/key/${PKI_WEBSRV} -outform pem  > ${WEB_PEM}
+openssl x509 -in ${PKI_DIR}/crt/${PKI_WEBSRV} -outform pem >> ${WEB_PEM}
+openssl x509 -in ${PKI_DIR}/crt/${PKI_SIGNER} -outform pem >> ${WEB_PEM}
 
 
 #####################################
 # Generate Diffie-Hellman parameters
 #####################################
-openssl dhparam -out $PKI_DIR/dh.pem $PKI_KEY_SIZE
-openvpn --genkey --secret $VPN_TLS_AUTH
+openssl dhparam -out ${PKI_DIR}/dh.pem ${PKI_KEY_SIZE}
+openvpn --genkey --secret ${VPN_TLS_AUTH}
 
 
 ####################
 # Configure OpenVPN
 ####################
-cat > "$VPN_CNF" <<EOF
-server $(getroute $VPN_SERVER)
+cat > "${VPN_CNF}" <<EOF
+server $(getroute ${VPN_SUBNET})
 verb 3
-key $PKI_DIR/key/$PKI_SERVER
-ca $PKI_DIR/crt/$PKI_SIGNER
-cert $PKI_DIR/crt/$PKI_SERVER
-dh $PKI_DIR/dh.pem
-tls-auth $VPN_TLS_AUTH
+key ${PKI_DIR}/key/${PKI_SERVER}
+ca ${PKI_DIR}/crt/${PKI_SIGNER}
+cert ${PKI_DIR}/crt/${PKI_SERVER}
+dh ${PKI_DIR}/dh.pem
+tls-auth ${VPN_TLS_AUTH}
 key-direction 0
 keepalive 10 60
 persist-key
@@ -198,15 +200,15 @@ status /tmp/openvpn-status.log
 
 user nobody
 group nogroup
-auth $VPN_AUTH_ALGO
-cipher $VPN_CIPHER
-tls-cipher $VPN_TLS_CIPHER
+auth ${VPN_AUTH_ALGO}
+cipher ${VPN_CIPHER}
+tls-cipher ${VPN_TLS_CIPHER}
 EOF
 
 
 # Append DNS servers
-[ "$VPN_DNS" == "1" ] && for i in $(echo $VPN_DNS_SERVERS | tr ',' ' '); do
-  echo "push dhcp-option DNS $i" >> "$VPN_CNF"
+[ "${VPN_DNS}" == "1" ] && for i in $(echo ${VPN_DNS_SERVERS} | tr ',' ' '); do
+  echo "push dhcp-option DNS ${i}" >> "${VPN_CNF}"
 done
 
 
@@ -215,31 +217,31 @@ done
 ###################################
 umask 0022
 
-cat > "$CLIENT_CNF" <<EOF
+cat > "${CLIENT_CNF}" <<EOF
 client
 nobind
-auth $VPN_AUTH_ALGO
-cipher $VPN_CIPHER
-tls-cipher $VPN_TLS_CIPHER
+auth ${VPN_AUTH_ALGO}
+cipher ${VPN_CIPHER}
+tls-cipher ${VPN_TLS_CIPHER}
 dev tun
 key-direction 1
 redirect-gateway def1
 remote-cert-tls server
-remote $IPV4_ADDR 1194 udp
+remote ${IPV4_ADDR} 1194 udp
 <key>
-$(openssl pkey -in $PKI_DIR/key/$PKI_CLIENT -outform pem)
+$(openssl pkey -in ${PKI_DIR}/key/${PKI_CLIENT} -outform pem)
 </key>
 <cert>
-$(openssl x509 -in $PKI_DIR/crt/$PKI_CLIENT -outform pem)
+$(openssl x509 -in ${PKI_DIR}/crt/${PKI_CLIENT} -outform pem)
 </cert>
 <ca>
-$(openssl x509 -in $PKI_DIR/crt/$PKI_SIGNER -outform pem)
+$(openssl x509 -in ${PKI_DIR}/crt/${PKI_SIGNER} -outform pem)
 </ca>
 <dh>
-$(cat $PKI_DIR/dh.pem)
+$(cat ${PKI_DIR}/dh.pem)
 </dh>
 <tls-auth>
-$(cat $VPN_TLS_AUTH)
+$(cat ${VPN_TLS_AUTH})
 </tls-auth>
 EOF
 
@@ -251,8 +253,11 @@ if [ ! -c /dev/net/tun ]; then
     mknod /dev/net/tun c 10 200
 fi
 
+# NAT client traffic
+iptables -t nat -A POSTROUTING -s ${VPN_SUBNET} -o $(getnetdevice) -j MASQUERADE
+
 # Once the VPN process is up, we can delete the key files
-nohup sh -c 'sleep 5 && rm -rf $PKI_DIR/key' > /dev/null 2>&1 &
+nohup sh -c "while [ ! -f ${VPN_PID} ]; do sleep 1; done && rm -rf $PKI_DIR/key" > /dev/null 2>&1 &
 
 # Start the OpenVPN process
-openvpn --config $VPN_CNF --writepid $VPN_PID
+openvpn --config ${VPN_CNF} --writepid ${VPN_PID}
