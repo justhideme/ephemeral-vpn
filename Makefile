@@ -1,4 +1,4 @@
-TAG = justhideme/openvpn:latest
+TAG = justhideme/ephemeral-vpn:latest
 
 CONTAINER = ephemeral-vpn
 
