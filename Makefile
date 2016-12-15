@@ -1,6 +1,6 @@
 TAG = justhideme/openvpn:latest
 
-CONTAINER = justhideme_vpn_M
+CONTAINER = ephemeral-vpn
 
 NOW = $(shell /bin/date '+%Y%m%d-%H%M')
 
