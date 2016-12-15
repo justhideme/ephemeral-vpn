@@ -25,16 +25,19 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
 2. Run a bootstrap command (they all do the same thing):
 
   Fast:
+
   `curl -fs justhide.me | bash`
   
   \- or -
 
   Slightly paranoid:
+
   `curl -fs https://justhideme.github.io/bootstrap/run | bash`
 
   \- or -
 
   Super paranoid:
+
   `docker run -dit --name justhideme_vpn --cap-add=NET_ADMIN -p 1194:1194/udp justhidme/vpn:latest`
   `docker exec -it justhideme_vpn "/get_config.sh"`
 
@@ -50,7 +53,6 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
 3. The bootstrap script ensures (Docker)[https://docker.com] is available, then does this:
 
   `docker run -dit --name ephemeral-vpn --cap-add=NET_ADMIN -p 1194:1194/udp -p 443:443 justhidme/ephemeral-vpn:latest`
-  \- and -
   `docker exec -it ephemeral-vpn "/get_config.sh"`
 
   It also creates a "watchdog" process that will destroy the VPN Docker image when it exits. This helps ensure that sensitive files like logs and private keys are cleaned up.
@@ -74,7 +76,6 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
 6. To avoid the nicities of boostrapping and the various friendly messages, you can create the VPN and fetch the client config by simply running the following `docker` commands:
 
   `docker run -dit --name ephemeral-vpn --cap-add=NET_ADMIN -p 1194:1194/udp justhidme/vpn:latest`
-  \- and -
   `docker exec -it ephemeral-vpn "cat /etc/openvpn/client.conf"`
 
 
@@ -177,7 +178,7 @@ JustHideMe is inspired by, and to some degree an evolution of the work done by K
 
 #### Hosting providers
 
-* :thumbsup: [Vultr](https://vultr.com/?ref=7052201):heart: VM with 512 MB RAM running Ubuntu 14.04
+* :heart: [Vultr](https://vultr.com/?ref=7052201) VM with 512 MB RAM running Ubuntu 14.04
 
   \* *Recommended!* This is the provider we use. If you sign up with Vultr, please consider supporting this project by using our affiliate link [here](http://www.vultr.com/?ref=7062649-3B) or [here](http://www.vultr.com/?ref=7052201).
 
