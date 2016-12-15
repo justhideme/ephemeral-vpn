@@ -39,6 +39,7 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
   Super paranoid:
 
   `docker run -dit --name justhideme_vpn --cap-add=NET_ADMIN -p 1194:1194/udp justhidme/vpn:latest`
+
   `docker exec -it justhideme_vpn "/get_config.sh"`
 
 3. Use the VPN, then destroy the cloud host
@@ -53,6 +54,7 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
 3. The bootstrap script ensures (Docker)[https://docker.com] is available, then does this:
 
   `docker run -dit --name ephemeral-vpn --cap-add=NET_ADMIN -p 1194:1194/udp -p 443:443 justhidme/ephemeral-vpn:latest`
+
   `docker exec -it ephemeral-vpn "/get_config.sh"`
 
   It also creates a "watchdog" process that will destroy the VPN Docker image when it exits. This helps ensure that sensitive files like logs and private keys are cleaned up.
@@ -76,6 +78,7 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
 6. To avoid the nicities of boostrapping and the various friendly messages, you can create the VPN and fetch the client config by simply running the following `docker` commands:
 
   `docker run -dit --name ephemeral-vpn --cap-add=NET_ADMIN -p 1194:1194/udp justhidme/vpn:latest`
+
   `docker exec -it ephemeral-vpn "cat /etc/openvpn/client.conf"`
 
 
