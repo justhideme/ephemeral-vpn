@@ -7,6 +7,7 @@
 umask 0022
 source /etc/openvpn/env.sh
 CONF=${PKI_SERVER}.ovpn
+choice=x
 # TODO: sanity check the config
 
 boldtext=$(printf '%b\n' '\033[1m')
@@ -28,9 +29,20 @@ done
 echo ""
 
 
+if [ $TEST ]; then
+  echo "${hilight}TEST MODE${default}"
+  echo "${hilight} +env${default}"
+  cat /etc/openvpn/env.sh
+  echo "${hilight} +ifconfig${default}"
+  ifconfig -a
+  openvpn --config ${VPN_CNF} --mtu-test
+  choice=1
+fi
+
+
 prompt_for_config_method() {
-  read -p "Your choice: " opt
-  echo ${opt}
+  read -p "Pick one of [1] [2] [0]: " choice
+  echo ${choice}
 }
 
 
@@ -126,13 +138,12 @@ EOF
 
 
 while [ 1 ]; do
-    opt=$(prompt_for_config_method)
-    case "${opt}" in
+    case "${choice}" in
         1 ) do_showconf ; break ;;
         2 ) do_webserver ; break ;;
         0 ) break ;;
     esac
-    echo "? Pick one of: [1] [2] [0]"
+    choice=$(prompt_for_config_method)
 done
 
 
