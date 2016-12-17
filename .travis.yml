@@ -9,8 +9,8 @@ before_install:
 
 script:
   - make build V=test
-  - make test
-  - make logs
+  - make test V=test
+  - make logs V=test
 
 after_script:
-  - make clean
+  - make clean V=test
