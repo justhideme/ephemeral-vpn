@@ -1,0 +1,16 @@
+install:
+  - make
+
+services:
+  - docker
+
+before_install:
+  - docker --version
+
+script:
+  - make build V=test
+  - make test
+  - make logs
+
+after_script:
+  - make clean
