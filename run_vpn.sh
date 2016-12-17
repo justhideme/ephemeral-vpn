@@ -33,6 +33,7 @@ export VPN_SUBNET="192.168.255.0/25"
 export VPN_TLS_AUTH="${PKI_DIR}/key/tls-auth"
 export VPN_TLS_CIPHER="TLS-DHE-RSA-WITH-AES-128-CBC-SHA256"
 
+export CA_PEM="${PKI_DIR}/crt/${PKI_SIGNER}"
 export WEB_PEM="${PKI_DIR}/${PKI_WEBSRV}"
 
 

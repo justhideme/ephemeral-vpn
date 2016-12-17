@@ -78,16 +78,21 @@ EOF
   # This should work on any modern terminal
   qrencode -t ANSIUTF8 --foreground=ffffff --background=000000 "${URL}"
 
+  CERT_HASH=$(openssl x509 -fingerprint -noout -in ${WEB_PEM} | cut -d= -f2)
+  CA_HASH=$(openssl x509 -fingerprint -noout -in ${CA_PEM} | cut -d= -f2)
+
   cat <<EOF
 
 Or paste the following into a web browser:
   ${boldtext}${URL}${normtext}
 
 ${hilight}CONFIRM BEFORE IGNORING ANY SECURITY WARNINGS:${default}
+  READ THIS:    ${boldtext}https://justhideme.github.io/warnings.html${normtext}
   Cert Name:	${boldtext}${PKI_WEBSRV}${normtext}
+  Cert SHA1:    ${boldtext}${CERT_HASH}${normtext}
   Issued by:	${boldtext}${PKI_SIGNER}${normtext}
+  Issuer SHA1:  ${boldtext}${CA_HASH}${normtext}
   VPN Profile:  ${IPV4_ADDR}/autologin
-  More info:    ${boldtext}https://justhideme.github.io/warnings.html${normtext}
 
 Hurry, this URL will self-destruct after two minutes.
 
