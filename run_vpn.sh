@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# https://tunnelblick.net
-
-export DO_TOR=0
-
 ##########################
 # Variable Initialization
 ##########################
@@ -33,11 +29,12 @@ export VPN_AUTH_ALGO="SHA256"
 export VPN_CIPHER="AES-128-CBC"
 export VPN_DNS=1
 export VPN_DNS_SERVERS="208.67.222.222,208.67.220.220"
-export VPN_SUBNET="192.168.255.0/24"
+export VPN_SUBNET="192.168.255.0/25"
 export VPN_TLS_AUTH="${PKI_DIR}/key/tls-auth"
 export VPN_TLS_CIPHER="TLS-DHE-RSA-WITH-AES-128-CBC-SHA256"
 
 export WEB_PEM="${PKI_DIR}/${PKI_WEBSRV}"
+
 
 ##############################
 # Create the environment file
@@ -205,7 +202,6 @@ cipher ${VPN_CIPHER}
 tls-cipher ${VPN_TLS_CIPHER}
 EOF
 
-
 # Append DNS servers
 [ "${VPN_DNS}" == "1" ] && for i in $(echo ${VPN_DNS_SERVERS} | tr ',' ' '); do
   echo "push dhcp-option DNS ${i}" >> "${VPN_CNF}"
@@ -245,6 +241,7 @@ $(cat ${VPN_TLS_AUTH})
 </tls-auth>
 EOF
 
+
 ################
 # Start OpenVPN
 ################
@@ -253,11 +250,13 @@ if [ ! -c /dev/net/tun ]; then
     mknod /dev/net/tun c 10 200
 fi
 
-# NAT client traffic
-iptables -t nat -A POSTROUTING -s ${VPN_SUBNET} -o $(getnetdevice) -j MASQUERADE
+if [ ! $TEST ]; then
+  # NAT client traffic
+  iptables -t nat -A POSTROUTING -s ${VPN_SUBNET} -o $(getnetdevice) -j MASQUERADE
 
-# Once the VPN process is up, we can delete the key files
-nohup sh -c "while [ ! -f ${VPN_PID} ]; do sleep 1; done && rm -rf $PKI_DIR/key" > /dev/null 2>&1 &
+  # Once the VPN process is up, we can delete the key files
+  nohup sh -c "while [ ! -f ${VPN_PID} ]; do sleep 1; done && rm -rf $PKI_DIR/key" > /dev/null 2>&1 &
+fi
 
 # Start the OpenVPN process
 openvpn --config ${VPN_CNF} --writepid ${VPN_PID}
