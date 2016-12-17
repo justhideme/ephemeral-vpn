@@ -189,9 +189,11 @@ JustHideMe is inspired by, and to some degree an evolution of the work done by K
 
 * :heart: [Vultr](https://vultr.com/?ref=7052201) VM with 512 MB RAM running Ubuntu 14.04
 
-  \* *Recommended!* This is the provider we use. If you sign up with Vultr, please consider supporting this project by using our affiliate link [here](http://www.vultr.com/?ref=7062649-3B) or [here](http://www.vultr.com/?ref=7052201).
+  \* *Recommended!* This is the provider we use. If you sign up with Vultr, please consider supporting this project by using our affiliate link above or [here](http://www.vultr.com/?ref=7062649-3B).
 
-* :question: TODO: [Digital Ocean](https://digitalocean.com/) Droplet with 512 MB RAM running Ubuntu 14.04
+* :thumbsup: [Digital Ocean](https://m.do.co/c/98aaaa07c494) Droplet with 512 MB RAM running Ubuntu 14.04
+
+  \* Our alternate provider. If you sign up with D.O., please consider supporting this project by using our affiliate link above.
 
 * :question: TODO: [OVH](https://ovh.com) VPS 2016 SSD1 running Docker on Ubuntu 14.04 (Server 64bit)
 
