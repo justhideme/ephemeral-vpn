@@ -4,6 +4,10 @@ A portable installer for an ephemeral VPN server. Use once and throw away.
 
 It's like a burner phone for your Internet connection. Come to think of it, "burner VPN" would have made a good name too.
 
+[![Build Status](https://travis-ci.org/justhideme/ephemeral-vpn.svg)](https://travis-ci.org/justhideme/ephemeral-vpn)
+[![Docker Stars](https://img.shields.io/docker/stars/justhideme/ephemeral-vpn.svg)](https://hub.docker.com/r/justhideme/ephemeral-vpn)
+[![Docker Pulls](https://img.shields.io/docker/pulls/justhideme/ephemeral-vpn.svg)](https://hub.docker.com/r/justhideme/ephemeral-vpn)
+
 
 #### Links
 
@@ -129,11 +133,11 @@ It's like a burner phone for your Internet connection. Come to think of it, "bur
 
 #### Cons
 
-* It's not "set it and forget it"
+* Is not "set it and forget it"
 
 * You must re-download the client configuration every time
 
-* JustHideMe is a single-user system and does not consider scaling at all
+* Is a single-user system and does not consider scaling at all
 
 
 #### How is this different from an OpenVPN one-click-app?
@@ -149,9 +153,11 @@ Some cloud providers (for example, [Vultr](https://www.vultr.com/apps/openvpn)) 
 
 #### How is this different from [Kyle Manna's image](https://github.com/kylemanna/docker-openvpn)?
 
-JustHideMe is inspired by, and to some degree an evolution of the work done by Kyle Manna on his OpenVPN image for Docker. It's a great solution, and if you want a persistent self-hosted VPN, you should definitely consider it strongly. Our offering is different in a few ways:
+JustHideMe is inspired by, and to some degree an evolution of the work done by Kyle Manna on his OpenVPN image for Docker. It's a great solution for building persistent self-hosted VPNs, and if that's what you want then you should consider using it. Our offering is different in a few ways:
 
 * JustHideMe is designed to be ephemeral. Think of it like a burner phone: you throw it out when you're done
+
+* JustHideMe is meant for only one or two users/devices
 
 * JustHideMe goes to great pains to keep your [PII](https://en.wikipedia.org/wiki/Personally_identifiable_information) from floating around
 
@@ -162,19 +168,19 @@ JustHideMe is inspired by, and to some degree an evolution of the work done by K
 
 * The VPN uses `tun` mode, because it works on the widest range of devices
 
-* The topology used is `net30`, because it works on the widest range of OS
+* The VPN uses UDP in the IP range `192.168.255.0/25` for clients (together with the default `net30` topology this means the VPN should support ~30 clients)
 
-* The VPN uses UDP in the address range `192.168.255.0/24` for dynamic clients by default
+* The VPN will assign the OpenDNS resolvers to clients
 
 * After establishing a connection, clients will route all traffic through the VPN
 
 * Traffic is encrypted with AES128-CBC using SHA256 for message authentication because the combination is secure and performs well on the widest range of devices
 
-* The control channel is encrypted with `TLS_DHE_RSA_WITH_AES_128_CBC_SHA256` (IANA 0x0067) because the cipher suite is secure and performs well on the widest range of devices
+* The control channel is encrypted with `TLS_DHE_RSA_WITH_AES_128_CBC_SHA256` (IANA 0x0067) because the cipher suite is secure and performs well on a wide range of devices
 
-* The Docker container runs its own ephemeral Certificate Authority, with a dynamic CA cert name
+* The Docker container runs its own ephemeral Certificate Authority using a dynamic CA
 
-* The entire ephemeral Certificate Authority is build in the VPN container and the CA and server keys are deleted when the running docker image stops
+* The entire ephemeral Certificate Authority is built in the Docker container at run time and the all private keys are deleted when the container stops running
 
 
 ## Tested On
